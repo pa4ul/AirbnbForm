@@ -1,0 +1,12 @@
+/* src/components/GuestsheetForm.css */
+
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ant-card {
+  border-radius: 8px; /* Abgerundete Ecken für die Karte */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Schatten für die Karte */
+}

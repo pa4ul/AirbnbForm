@@ -2,14 +2,29 @@ import os
 from django.shortcuts import render
 from django.views import View
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from .models import Guestsheet
 from .serializers import GuestInfoSerializer
 from django.http import FileResponse, Http404
 from django.conf import settings
+from rest_framework.permissions import BasePermission, IsAuthenticated
+
+class IsAuthenticatedOrCreate(BasePermission):
+    """
+    Erlaubt nur authentifizierten Benutzern den Zugriff auf die Liste der Ressourcen.
+    Erlaubt jedem Benutzer das Erstellen neuer Ressourcen.
+    """
+
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return True
+        return request.user and request.user.is_authenticated
+
 
 class GuestSheetViewSet(viewsets.ModelViewSet):
     queryset = Guestsheet.objects.all()
     serializer_class = GuestInfoSerializer
+    permission_classes = [IsAuthenticatedOrCreate]
 
 class GuestSheetPDFView(View):
     def get(self, request, filename, *args, **kwargs):

@@ -3,10 +3,12 @@ import { Form, Input, Button, notification, Card } from "antd";
 import api from "../api";
 import AuthContext from "../contexts/AuthContext";
 import "../styles/LoginForm.css";
+import { useNavigate } from "react-router-dom"; // Importiere useNavigate
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext); // Verwende den AuthContext
+  const navigate = useNavigate(); // Initialisiere useNavigate
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -21,7 +23,9 @@ const LoginForm = () => {
         message: "Login Successful",
         description: "You have logged in successfully.",
       });
+
       setLoading(false);
+      navigate("/overview");
     } catch (error) {
       setLoading(false);
       notification.error({

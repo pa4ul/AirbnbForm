@@ -9,6 +9,12 @@ djangorestframework = "*"
 django-cors-headers = "*"
 pillow = "*"
 reportlab = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+djoser = "*"
+djangorestframework-simplejwt = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

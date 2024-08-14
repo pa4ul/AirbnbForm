@@ -8,6 +8,7 @@ import {
   InputNumber,
   Card,
   message,
+  Spin,
 } from "antd";
 import moment from "moment";
 import "../styles/GuestSheetForm.css";
@@ -15,11 +16,14 @@ import api from "../api";
 import SignaturePad from "./SignaturePad";
 
 const GuestsheetForm = () => {
-  const [form] = Form.useForm(); //Instanz des Ant Design Forms
+  const [form] = Form.useForm(); // Instanz des Ant Design Forms
   const [signature, setSignature] = useState("");
+  const [loading, setLoading] = useState(false); // State für den Ladeindikator
 
   const onFinish = (values) => {
     // Wird aufgerufen, wenn das Formular abgeschickt wird
+    setLoading(true); // Ladezustand aktivieren
+
     // Format the dates to match the Django model format
     const formattedValues = {
       ...values,
@@ -49,12 +53,15 @@ const GuestsheetForm = () => {
       .then((response) => {
         console.log("Success:", response.data);
         message.success("Entry created!");
-
         form.resetFields(); // Reset form after submission
         setSignature("");
       })
       .catch((error) => {
         console.error("Error:", error);
+        message.error("Failed to create entry.");
+      })
+      .finally(() => {
+        setLoading(false); // Ladezustand deaktivieren
       });
   };
 
@@ -70,6 +77,11 @@ const GuestsheetForm = () => {
   return (
     <div className="form-wrapper">
       <Card title="Guest Information" style={{ width: 800 }}>
+        {loading && (
+          <div className="loading-overlay">
+            <Spin size="large" />
+          </div>
+        )}
         <Form
           form={form}
           layout="vertical"
@@ -83,6 +95,7 @@ const GuestsheetForm = () => {
             traveling_with_date_of_birth: moment(),
           }}
         >
+          {/* Form Items */}
           <Form.Item
             name="first_name"
             label="First Name"
@@ -101,7 +114,13 @@ const GuestsheetForm = () => {
           >
             <Input />
           </Form.Item>
-          <Form.Item name="date_of_birth" label="Date of Birth">
+          <Form.Item
+            name="date_of_birth"
+            label="Date of Birth"
+            rules={[
+              { required: true, message: "Please input your date of birth!" },
+            ]}
+          >
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
           <Form.Item
@@ -115,33 +134,76 @@ const GuestsheetForm = () => {
           </Form.Item>
 
           {/* Travel Document Information */}
-          <Form.Item name="travel_document" label="Travel Document">
+          <Form.Item
+            name="travel_document"
+            label="Travel Document"
+            rules={[
+              { required: true, message: "Please input your travel document!" },
+            ]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="document_number" label="Document Number">
+          <Form.Item
+            name="document_number"
+            label="Document Number"
+            rules={[
+              {
+                required: true,
+                message: "Please input your travel document number!",
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="date_of_issue" label="Date of Issue">
+          <Form.Item
+            name="date_of_issue"
+            label="Date of Issue"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
-          <Form.Item name="issuing_authority" label="Issuing Authority">
+          <Form.Item
+            name="issuing_authority"
+            label="Issuing Authority"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="issuing_country" label="Issuing Country">
+          <Form.Item
+            name="issuing_country"
+            label="Issuing Country"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
 
           {/* Main Domicile Information */}
-          <Form.Item name="domicile_place" label="Domicile Place">
+          <Form.Item
+            name="domicile_place"
+            label="Domicile Place"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="domicile_zip_code" label="Domicile Zip Code">
+          <Form.Item
+            name="domicile_zip_code"
+            label="Domicile Zip Code"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="domicile_street" label="Domicile Street">
+          <Form.Item
+            name="domicile_street"
+            label="Domicile Street"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="domicile_country" label="Domicile Country">
+          <Form.Item
+            name="domicile_country"
+            label="Domicile Country"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <Input />
           </Form.Item>
 
@@ -178,16 +240,31 @@ const GuestsheetForm = () => {
           >
             <InputNumber min={1} />
           </Form.Item>
-          <Form.Item name="date_of_arrival" label="Date of Arrival">
+          <Form.Item
+            name="date_of_arrival"
+            label="Date of Arrival"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
-          <Form.Item name="date_of_departure" label="Date of Departure">
+          <Form.Item
+            name="date_of_departure"
+            label="Date of Departure"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
-          <Form.Item name="actual_departure" label="Actual Departure">
+          <Form.Item
+            name="actual_departure"
+            label="Actual Departure"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
-          <Form.Item label="Signature">
+          <Form.Item
+            label="Signature"
+            rules={[{ required: true, message: "Required!" }]}
+          >
             <SignaturePad onSave={handleSave} />
           </Form.Item>
           <Form.Item>

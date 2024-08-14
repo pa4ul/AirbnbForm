@@ -9,6 +9,7 @@ import {
   notification,
   message,
 } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const GuestSheetTable = () => {
   const [data, setData] = useState([]);
@@ -38,6 +39,34 @@ const GuestSheetTable = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setSelectedGuest(null);
+  };
+
+  const handleDownload = (id) => {
+    const filename = `Guestsheet_${id}.pdf`;
+    api
+      .get(`/api/pdf/${filename}/`, {
+        responseType: "blob", // Wichtig für den Download von Binärdaten
+      })
+      .then((response) => {
+        // Erstellen Sie ein URL-Objekt aus dem Blob
+        const url = window.URL.createObjectURL(
+          new Blob([response.data], { type: "application/pdf" })
+        );
+
+        // Erstellen Sie ein temporäres Link-Element und simulieren Sie einen Klick darauf
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", filename); // Der Name der heruntergeladenen Datei
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup: Entfernen Sie das Link-Element und das URL-Objekt
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error downloading the PDF:", error);
+      });
   };
 
   const handleDelete = (id) => {
@@ -97,21 +126,9 @@ const GuestSheetTable = () => {
           pagination={{ pageSize: 10 }}
         />
         <Modal
-          title="Guest Details"
           open={modalVisible}
           onCancel={handleCloseModal}
-          footer={[
-            <Button
-              key="delete"
-              type="danger"
-              onClick={() => handleDelete(selectedGuest.id)}
-            >
-              Delete
-            </Button>,
-            <Button key="cancel" onClick={handleCloseModal}>
-              Cancel
-            </Button>,
-          ]}
+          footer={null}
           width={800}
         >
           {selectedGuest && (
@@ -234,6 +251,38 @@ const GuestSheetTable = () => {
               )}
             </Descriptions>
           )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "20px",
+            }}
+          >
+            <Button
+              type="primary"
+              key="download"
+              icon={
+                <DownloadOutlined
+                  onClick={() => handleDownload(selectedGuest.id)}
+                />
+              }
+            >
+              Download
+            </Button>
+            <div>
+              <Button
+                key="delete"
+                type="danger"
+                onClick={() => handleDelete(selectedGuest.id)}
+                style={{ marginRight: "10px" }}
+              >
+                Delete
+              </Button>
+              <Button key="cancel" onClick={handleCloseModal}>
+                Cancel
+              </Button>
+            </div>
+          </div>
         </Modal>
       </Card>
     </div>

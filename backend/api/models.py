@@ -1,15 +1,20 @@
 import os
-from django.db import models
 import uuid
+import base64
+from io import BytesIO
+
+from django.db import models
+from PIL import Image as PilImage
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image as PlatypusImage
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
-from io import BytesIO
-import base64
-from PIL import Image as PilImage
+
 from .services.cloud_storage_service import upload_photo
+
+PDF_DIR = "pdfs"
+SIGNATURE_SCALE_FACTOR = 0.7
 
 class Guestsheet(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -45,7 +50,7 @@ class Guestsheet(models.Model):
     actual_departure = models.DateField(blank=True, null=True)
     
     # Signature
-    signature = models.TextField(blank=True, null=True)  # Hier speichern wir die Unterschrift als Base64-String
+    signature = models.TextField(blank=True, null=True)  # Signature as Base64 string
 
     # Other
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,36 +58,34 @@ class Guestsheet(models.Model):
     def __str__(self):
         return f"{self.last_name} {self.first_name} from {self.nationality}"
     
+    @staticmethod
     def base64_to_image(base64_str):
-        """Konvertiert einen Base64-kodierten String in ein Pillow Image-Objekt."""
-        base64_str = base64_str.split(',')[1]
-        image_data = base64.b64decode(base64_str)
-        image = PilImage.open(BytesIO(image_data))
-        return image
+        """Convert a Base64-encoded string to a Pillow Image object."""
+        try:
+            base64_str = base64_str.split(',')[1]
+            image_data = base64.b64decode(base64_str)
+            return PilImage.open(BytesIO(image_data))
+        except Exception as e:
+            print(f"Error converting base64 to image: {e}")
+            return None
 
     def generate_pdf(self):
-        pdf_dir = "pdfs"
-        if not os.path.exists(pdf_dir):
-            os.makedirs(pdf_dir)
+        if not os.path.exists(PDF_DIR):
+            os.makedirs(PDF_DIR)
 
         file_name = f"Guestsheet_{self.id}.pdf"
-        file_path = os.path.join(pdf_dir, file_name)
+        file_path = os.path.join(PDF_DIR, file_name)
 
         doc = SimpleDocTemplate(file_path, pagesize=letter)
         styles = getSampleStyleSheet()
         
-        # Define custom styles
         title_style = ParagraphStyle(name='Title', fontSize=16, spaceAfter=12, alignment=1, fontName="Helvetica-Bold")
         heading_style = ParagraphStyle(name='Heading', fontSize=14, spaceAfter=8, fontName="Helvetica-Bold")
         normal_style = ParagraphStyle(name='Normal', fontSize=12, fontName="Helvetica")
         
-        # Prepare content
         content = []
-
-        # Title
         content.append(Paragraph("Guest Information", title_style))
 
-        # Data Table
         data = [
             ['Field', 'Value'],
             ['First Name', self.first_name],
@@ -107,21 +110,16 @@ class Guestsheet(models.Model):
             ['Created At', self.created_at]
         ]
 
-        # Process the signature if available
         if self.signature:
-            base64_string = self.signature.split(",")[1]
-            image_bytes = base64.b64decode(base64_string)
-            image_stream = BytesIO(image_bytes)
-            image = PilImage.open(image_stream)
-            scale_factor = 0.7
-            new_size = tuple(int(dim * scale_factor) for dim in image.size)
-            resized_image = image.resize(new_size, PilImage.Resampling.LANCZOS)
-            image_path = os.path.join(pdf_dir, f"Signature_{self.id}.png")
-            resized_image.save(image_path, format="PNG")
-            
-            # Add signature image to the table data
-            signature_img = PlatypusImage(image_path, width=new_size[0], height=new_size[1])
-            data.append(['Signature', signature_img])
+            image = self.base64_to_image(self.signature)
+            if image:
+                new_size = tuple(int(dim * SIGNATURE_SCALE_FACTOR) for dim in image.size)
+                resized_image = image.resize(new_size, PilImage.Resampling.LANCZOS)
+                signature_img = BytesIO()
+                resized_image.save(signature_img, format="PNG")
+                signature_img.seek(0)
+                signature_img = PlatypusImage(signature_img, width=new_size[0], height=new_size[1])
+                data.append(['Signature', signature_img])
 
         table = Table(data, colWidths=[2*inch, 4*inch])
         table.setStyle(TableStyle([
@@ -133,13 +131,11 @@ class Guestsheet(models.Model):
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ]))
         content.append(table)
-
-        # Build the PDF
         doc.build(content)
 
         return file_path
     
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Speichere zuerst das Objekt in der Datenbank
-        new_file=self.generate_pdf()  # Erstelle die PDF-Datei danach
+        super().save(*args, **kwargs)  # Save object to database first
+        new_file = self.generate_pdf()  # Then create PDF file
         upload_photo(new_file, self.last_name)

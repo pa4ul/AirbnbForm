@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext"; // Importiere AuthProvider
+import "./styles/App.css";
 
 const { Sider, Content } = Layout;
 
@@ -16,7 +17,7 @@ const App = () => {
     <Router>
       <AuthProvider>
         <Layout style={{ minHeight: "100vh" }}>
-          <Sider width={200}>
+          <Sider width={200} className="sider-component">
             <Navbar />
           </Sider>
           <Layout>

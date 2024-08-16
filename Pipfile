@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
-django-cors-headers = "*"
 pillow = "*"
 reportlab = "*"
 google-api-python-client = "*"
@@ -15,6 +14,7 @@ google-auth-oauthlib = "*"
 djoser = "*"
 djangorestframework-simplejwt = "*"
 python-dotenv = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 

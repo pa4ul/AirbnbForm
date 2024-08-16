@@ -1,4 +1,4 @@
-import react, { useRef } from "react";
+import React, { useRef } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { Button } from "antd";
 import "../styles/SignaturePad.css";
@@ -18,7 +18,7 @@ const SignaturePad = ({ onSave }) => {
       <SignatureCanvas
         ref={sigCanvas}
         penColor="black"
-        canvasProps={{ width: 500, height: 200, className: "signature-canvas" }}
+        canvasProps={{ className: "signature-canvas" }}
       />
       <div className="signature-pad-buttons">
         <Button onClick={clear} style={{ marginRight: "10px" }}>

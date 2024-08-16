@@ -1,4 +1,11 @@
 .signature-canvas {
+  width: 500px;
+  height: 200px;
   border: 1px solid #ccc;
-  background-color: #fff;
+}
+
+@media only screen and (max-width: 600px) {
+  .signature-canvas {
+    width: 100%;
+  }
 }

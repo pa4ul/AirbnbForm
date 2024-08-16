@@ -22,3 +22,8 @@
   justify-content: center;
   z-index: 1000; /* Ensure it is on top of other content */
 }
+@media (max-width: 768px) {
+  .ant-card {
+    width: 100% !important; /* Versteckt den Sider auf mobilen Geräten */
+  }
+}

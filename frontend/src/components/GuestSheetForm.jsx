@@ -76,7 +76,11 @@ const GuestsheetForm = () => {
 
   return (
     <div className="form-wrapper">
-      <Card title="Guest Information" style={{ width: 800 }}>
+      <Card
+        title="Guest Information"
+        style={{ width: 800 }}
+        className="card-component"
+      >
         {loading && (
           <div className="loading-overlay">
             <Spin size="large" />
@@ -268,7 +272,7 @@ const GuestsheetForm = () => {
             <SignaturePad onSave={handleSave} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" disabled={!signature}>
               Submit
             </Button>
           </Form.Item>

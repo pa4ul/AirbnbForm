@@ -1,0 +1,5 @@
+@media (max-width: 768px) {
+  .sider-component {
+    display: none; /* Versteckt den Sider auf mobilen Geräten */
+  }
+}

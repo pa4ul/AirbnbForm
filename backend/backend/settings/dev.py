@@ -8,6 +8,7 @@ DEBUG = True
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 ALLOWED_HOSTS = ["*"]
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
